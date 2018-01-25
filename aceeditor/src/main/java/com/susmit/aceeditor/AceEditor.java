@@ -22,17 +22,23 @@ public class AceEditor extends WebView
     Context context;
     private PopupWindow pw;
     private View popupView;
+
     private ResultReceivedListener received;
+    private OnLoadedEditorListener onLoadedEditorListener;
+
     private LayoutInflater inflater;
     private float x;
     private float y;
     private boolean actAfterSelect;
     private int requestedValue;
 
+    private boolean loadedUI;
+
     @SuppressLint("SetJavaScriptEnabled")
     public AceEditor(Context context)
     {
         super(context);
+        loadedUI = false;
         this.context = context;
         initialize();
     }
@@ -42,6 +48,7 @@ public class AceEditor extends WebView
     public AceEditor(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        loadedUI = false;
         this.context = context;
         initialize();
     }
@@ -60,6 +67,13 @@ public class AceEditor extends WebView
             }
         });
 
+        setOnLoadedEditorListener(new OnLoadedEditorListener() {
+            @Override
+            public void onCreate() {
+
+            }
+        });
+
         setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
@@ -72,7 +86,11 @@ public class AceEditor extends WebView
         setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-
+                if(!loadedUI)
+                {
+                    loadedUI = true;
+                    onLoadedEditorListener.onCreate();
+                }
             }
 
             @Override
@@ -229,6 +247,11 @@ public class AceEditor extends WebView
     public void setResultReceivedListener(ResultReceivedListener listener)
     {
         this.received = listener;
+    }
+
+    public void setOnLoadedEditorListener(OnLoadedEditorListener listener)
+    {
+        this.onLoadedEditorListener = listener;
     }
 
     public void requestText()
