@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>ACE in Action</title>
+<style type="text/css" media="screen">
+    #editor { 
+        position: absolute;
+        display: inline-block;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+    }
+</style>
+</head>
+<body>
+
+<div id="editor">#include<8051.h>
+void main()
+{
+
+}
+</div>
+
+<script src="src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/xcode");
+    editor.session.setMode("ace/mode/c_cpp");
+
+    function gettext()
+    {
+        alert(editor.getValue());
+    }
+
+</script>
+</body>
+</html>
+
