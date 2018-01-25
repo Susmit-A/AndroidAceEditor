@@ -1,11 +1,11 @@
 # AndroidAceEditor
-This project is an attempt to integrate a text/code editor as a modular component of the overall UI.
+This is a text/code editor meant for integration as a modular component of the overall UI.
 The aim is to provide a powerful editor that can be used just like any other View.
 
 Ace text editor has been used for this purpose because it is feature-rich, fast, and easy to modify and embed in applications.
 
 
-Please note that this library currently supports android version 5.0(Lollipop) and above.
+Please note that this library is currently supported android version 5.0(Lollipop) and above.
 
 Integration to existing project
 ---
@@ -44,7 +44,7 @@ dependencies {
 ```
 
 #### Java
-Demp Activity:
+Demo Activity:
 ```java
 public class MainActivity extends Activity {
 
