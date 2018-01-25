@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         editor = findViewById(R.id.editor);
         
-        //call this to set up themes or modes at load time.
+        //call this to set up themes or modes at time of creation of view.
         //If you are setting the theme or mode through another view's action,
         //call setTheme and/or setMode directly
         editor.setOnLoadedEditorListener(new OnLoadedEditorListener() {
