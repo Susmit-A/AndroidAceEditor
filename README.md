@@ -5,9 +5,9 @@ The aim is to provide a powerful editor that can be used just like any other Vie
 Ace text editor has been used for this purpose because it is feature-rich, fast, and easy to modify and embed in applications.
 
 
-Please note that this library is currently supported android version 5.0(Lollipop) and above.
+Please note that this library is currently supported on android versions 5.0(Lollipop) and above.
 
-Integration to existing project
+Integration with existing project
 ---
 
 ### Setup
@@ -79,4 +79,3 @@ public class MainActivity extends Activity {
     }
 }
 ```
-
