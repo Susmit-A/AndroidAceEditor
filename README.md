@@ -28,7 +28,7 @@ allprojects {
 ```groovy
 dependencies {
     ...
-    compile 'com.github.Susmit-A:AndroidAceEditor:0.1.3'
+    compile 'com.github.Susmit-A:AndroidAceEditor:0.5.0'
 }
 ```
 
