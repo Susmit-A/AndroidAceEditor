@@ -6,5 +6,5 @@ package com.susmit.aceeditor;
 
 public interface ResultReceivedListener
 {
-    void onReceived(String text, int FLAG_VALUE);
+    void onReceived(int FLAG_VALUE, String... results);
 }

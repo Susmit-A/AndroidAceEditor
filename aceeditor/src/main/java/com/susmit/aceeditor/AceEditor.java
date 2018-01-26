@@ -16,21 +16,32 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.PopupWindow;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class AceEditor extends WebView
 {
     Context context;
     private PopupWindow pw;
     private View popupView;
+    private LayoutInflater inflater;
 
     private ResultReceivedListener received;
     private OnLoadedEditorListener onLoadedEditorListener;
+    private OnSelectionActionPerformedListener onSelectionActionPerformedListener;
 
-    private LayoutInflater inflater;
     private float x;
     private float y;
     private boolean actAfterSelect;
     private int requestedValue;
+    private String findString;
 
     private boolean loadedUI;
 
@@ -62,7 +73,7 @@ public class AceEditor extends WebView
 
         setResultReceivedListener(new ResultReceivedListener() {
             @Override
-            public void onReceived(String text, int FLAG_VALUE) {
+            public void onReceived(int FLAG_VALUE, String... results) {
 
             }
         });
@@ -74,11 +85,66 @@ public class AceEditor extends WebView
             }
         });
 
+        setOnSelectionActionPerformedListener(new OnSelectionActionPerformedListener() {
+            @Override
+            public void onSelectionFinished(boolean usingSelectAllOption) {
+
+            }
+
+            @Override
+            public void onCut() {
+
+            }
+
+            @Override
+            public void onCopy() {
+
+            }
+
+            @Override
+            public void onPaste() {
+
+            }
+
+            @Override
+            public void onUndo() {
+
+            }
+
+            @Override
+            public void onRedo() {
+
+            }
+        });
+
         setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
                 result.confirm();
-                received.onReceived(message, requestedValue);
+                List<String> results = new LinkedList<>();
+                try {
+                    JSONArray objArr = new JSONArray(message);
+                    for(int i = 0; i<objArr.length(); i++) {
+                        results.add(String.valueOf(objArr.get(i)));
+                    }
+                }
+                catch (JSONException e)
+                {
+                    try {
+                        JSONObject obj = new JSONObject(message);
+                        Iterator<String> keyInerator = obj.keys();
+                        while (keyInerator.hasNext()) {
+                            String key = keyInerator.next();
+                            results.add(String.valueOf(obj.get(key)));
+                        }
+                    }
+                    catch (JSONException e1) {
+                        results.add(message);
+                    }
+                }
+                String []res = new String[results.size()];
+                res = results.toArray(res);
+                received.onReceived(requestedValue, res);
                 return true;
             }
         });
@@ -98,6 +164,7 @@ public class AceEditor extends WebView
                 return false;
             }
         });
+
         setOnTouchListener(new View.OnTouchListener()
         {
             float downTime;
@@ -119,9 +186,11 @@ public class AceEditor extends WebView
                         y = event.getY();
                         if(tot <= 500)
                             v.performClick();
-                        else
-                            if(actAfterSelect)
-                                pw.showAtLocation(v, Gravity.NO_GRAVITY,(int)x - getResources().getDisplayMetrics().widthPixels/3,getResources().getDisplayMetrics().heightPixels/12 + (int)y);
+                        else {
+                            if (actAfterSelect)
+                                pw.showAtLocation(v, Gravity.NO_GRAVITY, (int) x - getResources().getDisplayMetrics().widthPixels / 3, getResources().getDisplayMetrics().heightPixels / 12 + (int) y);
+                            onSelectionActionPerformedListener.onSelectionFinished(false);
+                        }
                         break;
                     case MotionEvent.ACTION_MOVE:
                         xtimes = (int) (x - event.getX()) / 25;
@@ -197,6 +266,7 @@ public class AceEditor extends WebView
                 AceEditor.this.dispatchKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_X, 0, KeyEvent.META_CTRL_ON));
                 AceEditor.this.requestFocus();
                 pw.dismiss();
+                onSelectionActionPerformedListener.onCut();
             }
         });
         popupView.findViewById(R.id.copy).setOnClickListener(new OnClickListener() {
@@ -205,6 +275,7 @@ public class AceEditor extends WebView
                 AceEditor.this.dispatchKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_C, 0, KeyEvent.META_CTRL_ON));
                 AceEditor.this.requestFocus();
                 pw.dismiss();
+                onSelectionActionPerformedListener.onCopy();
             }
         });
         popupView.findViewById(R.id.paste).setOnClickListener(new OnClickListener() {
@@ -213,6 +284,7 @@ public class AceEditor extends WebView
                 AceEditor.this.dispatchKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_V, 0, KeyEvent.META_CTRL_ON));
                 AceEditor.this.requestFocus();
                 pw.dismiss();
+                onSelectionActionPerformedListener.onPaste();
             }
         });
         popupView.findViewById(R.id.selectall).setOnClickListener(new OnClickListener() {
@@ -220,18 +292,21 @@ public class AceEditor extends WebView
             public void onClick(View v) {
                 AceEditor.this.dispatchKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A, 0, KeyEvent.META_CTRL_ON));
                 popupView.findViewById(R.id.prevOptSet).performClick();
+                onSelectionActionPerformedListener.onSelectionFinished(true);
             }
         });
         popupView.findViewById(R.id.undo).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 AceEditor.this.dispatchKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_Z, 0, KeyEvent.META_CTRL_ON));
+                onSelectionActionPerformedListener.onUndo();
             }
         });
         popupView.findViewById(R.id.redo).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 AceEditor.this.dispatchKeyEvent(new KeyEvent(0, 0, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_Z, 0, KeyEvent.META_CTRL_ON|KeyEvent.META_SHIFT_ON));
+                onSelectionActionPerformedListener.onRedo();
             }
         });
         pw.setOnDismissListener(new PopupWindow.OnDismissListener() {
@@ -254,10 +329,9 @@ public class AceEditor extends WebView
         this.onLoadedEditorListener = listener;
     }
 
-    public void requestText()
+    public void setOnSelectionActionPerformedListener(OnSelectionActionPerformedListener listener)
     {
-        requestedValue = Request.VALUE_TEXT;
-        loadUrl("javascript:alert(editor.getValue());");
+        this.onSelectionActionPerformedListener = listener;
     }
 
     public void showOptionsAfterSelection(boolean show)
@@ -280,16 +354,97 @@ public class AceEditor extends WebView
         loadUrl("javascript:editor.insert(\"" + text +"\");");
     }
 
-    public void requestLines()
+
+    public void requestText()
     {
-        requestedValue = Request.VALUE_LINES;
+        requestedValue = Request.TEXT_REQUEST;
+        loadUrl("javascript:alert(editor.getValue());");
+    }
+
+    public void requestRowCount()
+    {
+        requestedValue = Request.ROW_COUNT_REQUEST;
         loadUrl("javascript:alert(editor.session.getLength());");
     }
 
     public void requsetSelectedText()
     {
-        requestedValue = Request.VALUE_SELECTED_TEXT;
-        loadUrl("javascript:alert(editor.getCopyText());");
+        requestedValue = Request.TEXT_REQUEST;
+        loadUrl("javascript:alert(editor.getSelectedText());");
+    }
+
+    public void requestCursorCoords()
+    {
+        requestedValue = Request.CURSOR_COORDS_REQUEST;
+        loadUrl("javascript:alert(JSON.stringify(editor.getCursorPosition()))");
+    }
+
+    public void requestLine(int lineNumber)
+    {
+        requestedValue = Request.TEXT_REQUEST;
+        loadUrl("javascript:alert(editor.session.getLine("+ String.valueOf(lineNumber) + "));");
+    }
+
+    public void requestLinesBetween(int startLine, int endLine)
+    {
+        requestedValue = Request.MULTIPLE_LINES_REQUEST;
+        loadUrl("javascript:alert(JSON.stringify(editor.session.getLines("+ String.valueOf(startLine) + ", "+ String.valueOf(endLine) + ")));");
+    }
+
+    public void startFind(String toFind, boolean backwards, boolean wrap, boolean caseSensitive, boolean wholeWord)
+    {
+        findString = toFind;
+        loadUrl("javascript:editor.find('" + toFind + "', backwards: "+ String.valueOf(backwards) +
+                ", wrap: "+ String.valueOf(wrap) +
+                ",caseSensitive: "+ String.valueOf(caseSensitive) +
+                ",wholeWord: "+ String.valueOf(wholeWord) +",regExp: false});");
+    }
+
+    public void findNext()
+    {
+        if(findString == null) {
+            return;
+        }
+        loadUrl("javascript:editor.findNext();");
+    }
+
+    public void findNext(String errorToastMessage, int showFor)
+    {
+        if(findString == null) {
+            Toast.makeText(context,errorToastMessage,showFor).show();
+            return;
+        }
+        loadUrl("javascript:editor.findNext();");
+    }
+
+    public void findPrevious()
+    {
+        if(findString == null) {
+            return;
+        }
+        loadUrl("javascript:editor.findPrevious();");
+    }
+
+    public void findPrevious(String toastMessage, int showFor)
+    {
+        if(findString == null) {
+            Toast.makeText(context,toastMessage,showFor).show();
+            return;
+        }
+        loadUrl("javascript:editor.findPrevious();");
+    }
+
+    public void replace(String replaceText, boolean replaceAll)
+    {
+        if(replaceAll)
+            loadUrl("javascript:editor.replaceAll('" + replaceText + "');");
+        else
+            loadUrl("javascript:editor.replace('" + replaceText + "');");
+    }
+
+    public void endFind()
+    {
+        findString = null;
     }
 
     public void setTheme(Theme theme)
@@ -303,9 +458,11 @@ public class AceEditor extends WebView
     }
 
     public static class Request{
-        public static int VALUE_TEXT = 0;
-        public static int VALUE_LINES = 1;
-        public static int VALUE_SELECTED_TEXT = 2;
+        public static int GENERIC_REQUEST = 0;
+        public static int TEXT_REQUEST = 1;
+        public static int ROW_COUNT_REQUEST = 2;
+        public static int CURSOR_COORDS_REQUEST = 3;
+        public static int MULTIPLE_LINES_REQUEST = 4;
     }
 
     public static enum Theme
