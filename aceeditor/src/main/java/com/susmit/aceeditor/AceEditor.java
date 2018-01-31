@@ -341,7 +341,7 @@ public class AceEditor extends WebView
 
     public void setText(String text)
     {
-        loadUrl("javascript:editor.setValue(\"" + text +"\");");
+        loadUrl("javascript:editor.session.setValue(\"" + text +"\");");
     }
 
     public void setFontSize(int fontSizeInpx)
