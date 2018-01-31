@@ -346,7 +346,7 @@ public class AceEditor extends WebView
 
     public void setFontSize(int fontSizeInpx)
     {
-        loadUrl("javascript:document.getElementById('editor').style.fontSize='" + String.valueOf(fontSizeInpx) + "px';");
+        loadUrl("javascript:document.getElementById(\'editor\').style.fontSize=\'" + String.valueOf(fontSizeInpx) + "px\';");
     }
 
     public void insertTextAtCursor(String text)
