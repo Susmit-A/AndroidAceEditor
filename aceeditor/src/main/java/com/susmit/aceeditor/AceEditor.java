@@ -346,7 +346,7 @@ public class AceEditor extends WebView
 
     public void setFontSize(int fontSizeInpx)
     {
-        loadUrl("document.getElementById('editor').style.fontSize='" + String.valueOf(fontSizeInpx) + "px';");
+        loadUrl("javascript:document.getElementById('editor').style.fontSize='" + String.valueOf(fontSizeInpx) + "px';");
     }
 
     public void insertTextAtCursor(String text)
@@ -445,6 +445,14 @@ public class AceEditor extends WebView
     public void endFind()
     {
         findString = null;
+    }
+
+    public void setSoftWrap(boolean enabled)
+    {
+        if(enabled)
+            loadUrl("javascript:editor.getSession().setUseWrapMode(true);");
+        else
+            loadUrl("javascript:editor.getSession().setUseWrapMode(false);");
     }
 
     public void setTheme(Theme theme)
