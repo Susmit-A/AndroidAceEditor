@@ -45,6 +45,12 @@ public class AceEditor extends WebView
 
     private boolean loadedUI;
 
+    private OnTouchListener scroller;
+    private OnTouchListener selector;
+
+    public static int ACTION_SCROLL=1;
+    public static int ACTION_SELECT=0;
+
     @SuppressLint("SetJavaScriptEnabled")
     public AceEditor(Context context)
     {
@@ -64,6 +70,7 @@ public class AceEditor extends WebView
         initialize();
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void initialize()
     {
         inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
@@ -165,7 +172,8 @@ public class AceEditor extends WebView
             }
         });
 
-        setOnTouchListener(new View.OnTouchListener()
+
+        selector=new View.OnTouchListener()
         {
             float downTime;
             int xtimes;
@@ -217,7 +225,38 @@ public class AceEditor extends WebView
                 }
                 return false;
             }
-        });
+        };
+
+        scroller = new OnTouchListener() {
+            float downTime;
+            int xtimes;
+            int ytimes;
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        downTime = event.getEventTime();
+                        x=event.getX();
+                        y=event.getY();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        x = event.getX();
+                        y = event.getY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        xtimes = (int) (x - event.getX());
+                        ytimes = (int) (y - event.getY());
+                        scrollBy(xtimes,ytimes);
+                        break;
+                }
+                return false;
+            }
+        };
+
+        setOnTouchListener(selector);
+
         setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -230,6 +269,7 @@ public class AceEditor extends WebView
         loadUrl("file:///android_asset/index.html");
     }
 
+    @SuppressLint("InflateParams")
     private void initPopup()
     {
         pw = new PopupWindow(context);
@@ -463,6 +503,14 @@ public class AceEditor extends WebView
     public void setMode(Mode mode)
     {
         loadUrl("javascript:editor.session.setMode(\"ace/mode/" + mode.name().toLowerCase() + "\");");
+    }
+
+    public void setTouchAction(int action)
+    {
+        if(action==ACTION_SCROLL)
+            setOnTouchListener(scroller);
+        else
+            setOnTouchListener(selector);
     }
 
     public static class Request{
