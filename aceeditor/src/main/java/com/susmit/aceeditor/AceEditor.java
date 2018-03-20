@@ -11,6 +11,9 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -70,6 +73,16 @@ public class AceEditor extends WebView
         initialize();
     }
 
+    @Override
+    public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+        return new BaseInputConnection(this, false); //this is needed for #dispatchKeyEvent() to be notified.
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return super.dispatchKeyEvent(event);
+
+    }
     @SuppressLint("SetJavaScriptEnabled")
     private void initialize()
     {
